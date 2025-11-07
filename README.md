@@ -39,4 +39,11 @@ Przykład pliku:
 id;airbus A380;400;10000
 id;airbus A380;400;12000
 
+
+
+STRUKTURA PLIKÓW:
+PLik główny
+Foldery:
+  - Klasy
+  - Pliki
     
