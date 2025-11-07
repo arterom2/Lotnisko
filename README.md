@@ -3,11 +3,15 @@ User:
   - Terminarz lotów
   - Zapisywanie się na lot
   - Odwoływanie lotów
-  - 
+  - Zmiana danych osobowych
+  - Przeglądanie lotów
+  - Program lojalnościowy (zniżka na loty)
+  - Wyszukiwarka połączeń (skąd dokąd)
 
 Admin:
   - Dodawanie nowych terminów lotu
   - Odwoływanie terminów
+  - Edycja istniejącyh lotów
 
 
 Baza:
