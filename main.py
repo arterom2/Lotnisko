@@ -1,7 +1,10 @@
 from functions.auth import greeting
 from functions.user import user_panel
+from rich.console import Console
+from rich.panel import Panel
 
 
+console = Console()
 def main():
     user = greeting() 
 
