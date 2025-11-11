@@ -1,2 +1,4 @@
-1;admin;admin123;Admin;Nowak;admin
-2;janek;haslo123;Jan;Kowalski;user
+1;admin;admin123;Admin;Nowak;1
+2;janek;haslo123;Jan;Kowalski;0
+3;artem;123456;artem;perev;1
+4;olga123;lalala;olga;lala;0
