@@ -1,0 +1,2 @@
+1;admin;admin123;Admin;Nowak;admin
+2;janek;haslo123;Jan;Kowalski;user
