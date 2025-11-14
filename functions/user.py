@@ -1,16 +1,49 @@
+from classes.flightsBD import flightsBD
+from functions.flights import *
+
 def user_panel(user):
+    poprawnosc = False
+    choice = 0
     print("\n===================================")
     print(f"✈️ Welcome, {user.first_name} {user.last_name}!")
     print("===================================\n")
     
-    print("Here are the options available to you:\n")
-    print("1️⃣  View available flights")
-    print("2️⃣  Book a flight")
-    print("3️⃣  Cancel a flight")
-    print("4️⃣  Change personal information")
-    print("5️⃣  Loyalty program / View points")
-    print("6️⃣  Search connections (from → to)")
-    print("7️⃣  Logout / Exit\n")
-    
-    print("Please select an option by entering the number.\n")
-    print("===================================\n")
+    while not poprawnosc:
+        print("Here are the options available to you:\n")
+        print("1️⃣  View available flights")
+        print("2️⃣  Book a flight")
+        print("3️⃣  Cancel a flight")
+        print("4️⃣  Change personal information")
+        print("5️⃣  Loyalty program / View points")
+        print("6️⃣  Search connections (from → to)")
+        print("7️⃣  Logout / Exit\n")
+        
+        print("Please select an option by entering the number.\n")
+        print("===================================\n")
+        
+        try:
+            choice = int(input("Your choice: "))
+            if 1<=choice<=7:
+                poprawnosc = True
+            else:
+                print("Please enter a number between 1 and 7")
+        except ValueError:
+            print("Please enter a number between 1 and 7")
+
+    if choice == 1:
+        print("View available flights")
+        flights = load_flights(file_path_airplanes="data/airplanes.txt", file_path_flights="data/flight.txt")
+        FlightsBD = flightsBD(flights)
+        FlightsBD.showInformation()
+    elif choice == 2:
+        print("Book a flight")
+    elif choice == 3:
+        print("Cancel a flight")
+    elif choice == 4:
+        print("Change personal information")
+    elif choice == 5:
+        print("Loyalty program / View points")
+    elif choice == 6:
+        print("Search connections")
+    elif choice == 7:
+        print("Logout / Exit")
