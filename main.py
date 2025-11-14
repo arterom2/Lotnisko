@@ -13,6 +13,7 @@ def main():
 
     if user.role == "1":
         print(f"🔧 Welcome, {user.first_name} {user.last_name}!")
+        admin_panel(user)
     elif user.role == "0":
         user_panel(user)
     else:
