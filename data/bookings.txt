@@ -1,1 +1,2 @@
 4;1;Warsaw;New York;6300.0;8.5;2500.0;250;Airbus A380
+4;12;Poznan;Zurich;1000.0;1.8;420.0;28;Boeing 737
