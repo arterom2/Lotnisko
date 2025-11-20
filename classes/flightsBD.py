@@ -25,11 +25,12 @@ class flightsBD():
         table.add_column("Seats (taken/all)", style="green")
 
         for flight in self.fights:
-            airplane_name = f"{flight.airplane.name} {flight.airplane.model}" if flight.airplane else "Unknown"
-            seats = f"{flight.takenSeats}/{flight.airplane.seatsQuantity}"
-            table.add_row(
-                flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),str(flight.ticketPrice),str(flight.points),airplane_name,seats
-            )
+            if(flight.takenSeats < flight.airplane.seatsQuantity):
+                airplane_name = f"{flight.airplane.name} {flight.airplane.model}" if flight.airplane else "Unknown"
+                seats = f"{flight.takenSeats}/{flight.airplane.seatsQuantity}"
+                table.add_row(
+                    flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),str(flight.ticketPrice),str(flight.points),airplane_name,seats
+                )
         console.print(table)
         
     def timetable(self):

@@ -10,8 +10,9 @@ def load_users(file_path):
     users = []
     data = load_data(file_path)
     for row in data:
-        id, login, password, first_name, last_name, role = row
-        users.append(User(id, login, password, first_name, last_name, role))
+        id, login, password, first_name, last_name, role, points = row
+        points = int(points)
+        users.append(User(id, login, password, first_name, last_name, role, points))
     return users
 
 
@@ -64,11 +65,11 @@ def register(users, file_path):
     last_name = input()
 
     new_id = str(len(users) + 1)
-    new_user = User(new_id, login_input, password_input, first_name, last_name, "0")
+    new_user = User(new_id, login_input, password_input, first_name, last_name, "0", 0)
     users.append(new_user)
 
     data = load_data(file_path)
-    data.append([new_id, login_input, password_input, first_name, last_name, "0"])
+    data.append([new_id, login_input, password_input, first_name, last_name, "0", 0])
     save_data(file_path, data)
 
     console.print(Panel(
