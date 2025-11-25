@@ -132,6 +132,7 @@ def user_panel(user):
             input("Press Enter to return to the panel...")
         elif choice == 7:
             console.print(Panel.fit("[bold cyan]Loyalty program / View points[/bold cyan]", border_style="cyan"))
+            user.ViewPoints()
             input("Press Enter to return to the panel...")
         elif choice == 8:
             console.print(Panel.fit("[bold cyan]Change personal information[/bold cyan]", border_style="cyan"))
