@@ -81,3 +81,8 @@ class User:
             save_data(file_path, new_data)
             self.showInformation()
                     
+                    
+    def ViewPoints(self):
+        console = Console()
+        console.print(f"[green]{self.first_name} you have {self.loyalty_points} points!! Congratulations[/green]")
+        
