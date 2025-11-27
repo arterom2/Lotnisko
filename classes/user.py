@@ -1,5 +1,6 @@
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
 
 class User:
     def __init__(self, id, login, password, first_name, last_name, role, loyalty_points):
@@ -86,3 +87,92 @@ class User:
         console = Console()
         console.print(f"[green]{self.first_name} you have {self.loyalty_points} points!! Congratulations[/green]")
         
+    def book_flight(self, flights, flightsBD, file_path="data/bookings.txt"):
+        console = Console()
+        console.print(Panel.fit("[bold magenta]Book a flight[/bold magenta]", border_style="magenta"))
+
+        flightsBD.showInformation()
+        flight_to_book = input("\nEnter flight (Origin - Destination): ")
+
+        parts = flight_to_book.split('-')
+        if len(parts) != 2:
+            console.print("[red]Format must be: Paris - London[/red]")
+            return
+
+        origin = parts[0].strip()
+        destination = parts[1].strip()
+
+        matched = None
+        for f in flights:
+            if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower():
+                matched = f
+                break
+
+        if not matched:
+            console.print("[red]No matching flight found.[/red]")
+            return
+
+        table = Table.grid()
+        table.add_column()
+        table.add_column()
+        table.add_row("From:", f"[cyan]{matched.origin}[/cyan]")
+        table.add_row("To:", f"[cyan]{matched.destination}[/cyan]")
+        table.add_row("Distance:", f"{matched.distance} km")
+        table.add_row("Duration:", f"{matched.duration} h")
+        table.add_row("Price:", f"${matched.ticketPrice}")
+        table.add_row("Points:", f"{matched.points}")
+        airplane_name = f"{matched.airplane.name} {matched.airplane.model}"
+        table.add_row("Airplane:", f"[magenta]{airplane_name}[/magenta]")
+
+        console.print(Panel(table, title="Booking confirmation", border_style="green"))
+
+        try:
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write(';'.join([
+                    str(self.id), str(matched.id),
+                    matched.origin, matched.destination,
+                    str(matched.distance), str(matched.duration),
+                    str(matched.ticketPrice), str(matched.points),
+                    airplane_name
+                ]) + "\n")
+            console.print(f"[green]Booking saved! {matched.origin} → {matched.destination}[/green]")
+        except Exception as e:
+            console.print(f"[red]Error saving booking: {e}[/red]")
+
+    def view_bookings(self, file_path="data/bookings.txt"):
+        from rich.console import Console
+        from rich.table import Table
+        console = Console()
+
+        console.print(Panel.fit("[bold cyan]Your bookings[/bold cyan]", border_style="cyan"))
+
+        bookings = []
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as bf:
+                for line in bf:
+                    parts = line.strip().split(';')
+                    if len(parts) >= 2 and parts[0] == str(self.id):
+                        bookings.append(parts)
+        except FileNotFoundError:
+            console.print("[yellow]Booking file not found.[/yellow]")
+            return
+
+        if not bookings:
+            console.print("[yellow]You have no bookings.[/yellow]")
+            return
+
+        table = Table(title="Your Bookings")
+        table.add_column("From", style="cyan")
+        table.add_column("To", style="cyan")
+        table.add_column("Distance")
+        table.add_column("Duration")
+        table.add_column("Price")
+        table.add_column("Points")
+        table.add_column("Airplane")
+
+        for b in bookings:
+            table.add_row(b[2], b[3], b[4], b[5], b[6], b[7], b[8])
+
+        console.print(table)
+

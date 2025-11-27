@@ -49,84 +49,12 @@ def user_panel(user):
             FlightsBD.showInformation()
             input("Press Enter to return to the panel...")
         elif choice == 3:
-            console.print(Panel.fit("[bold magenta]Book a flight[/bold magenta]", border_style="bright_magenta"))
-            FlightsBD.showInformation()
-            flight_to_book = input("\nEnter the flight (Origin - Destination) you want to book: ")
-            parts = flight_to_book.split('-')
-            if len(parts) != 2:
-                console.print("[red]Please enter in format 'Origin - Destination' (e.g. Paris - London).[/red]")
-            else:
-                origin = parts[0].strip()
-                destination = parts[1].strip()
-                matched = None
-                for f in flights:
-                    if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower():
-                        matched = f
-                        break
-
-                if matched:
-                    table = Table.grid()
-                    table.add_column()
-                    table.add_column()
-                    table.add_row("From:", f"[cyan]{matched.origin}[/cyan]")
-                    table.add_row("To:", f"[cyan]{matched.destination}[/cyan]")
-                    table.add_row("Distance:", f"{matched.distance} km")
-                    table.add_row("Duration:", f"{matched.duration} h")
-                    table.add_row("Price:", f"${matched.ticketPrice}")
-                    table.add_row("Points:", f"{matched.points}")
-                    airplane_name = f"{matched.airplane.name} {matched.airplane.model}" if matched.airplane else "Unknown"
-                    table.add_row("Airplane:", f"[magenta]{airplane_name}[/magenta]")
-
-                    console.print(Panel(table, title="Booking confirmation", border_style="green"))
-
-                    try:
-                        with open('data/bookings.txt', 'a', encoding='utf-8') as bf:
-                            bf.write(';'.join([str(user.id), str(matched.id), matched.origin, matched.destination, str(matched.distance), str(matched.duration),str(matched.ticketPrice),str(matched.points),airplane_name]) + '\n')
-                        console.print(Panel.fit(f"[bold green]Booking saved for {matched.origin} → {matched.destination}[/bold green]", border_style="green"))
-                    except Exception as e:
-                        console.print(f"[red]Could not save booking: {e}[/red]")
-                else:
-                    console.print("[red]No matching flight found for that route.[/red]")
+              user.book_flight(flights, FlightsBD)
         elif choice == 4:
             console.print(Panel.fit("[bold cyan]Cancel fLight [/bold cyan]", border_style="cyan"))
             input("Press Enter to return to the panel...")
         elif choice == 5:
-            console.print(Panel.fit("[bold cyan] My Bookings [/bold cyan]", border_style="cyan"))
-            bookings = []
-            try:
-                with open('data/bookings.txt', 'r', encoding='utf-8') as bf:
-                    for line in bf:
-                        parts = line.strip().split(';')
-                        if len(parts) >= 2 and parts[0] == str(user.id):
-                            bookings.append(parts)
-            except FileNotFoundError:
-                bookings = []
-
-            if not bookings:
-                console.print("[yellow]You have no bookings.[/yellow]")
-                input("Press Enter to return to the panel...")
-            else:
-                table = Table(title="Your Bookings")
-                table.add_column("From", style="cyan")
-                table.add_column("To", style="cyan")
-                table.add_column("Distance")
-                table.add_column("Duration")
-                table.add_column("Price")
-                table.add_column("Points")
-                table.add_column("Airplane")
-
-                for b in bookings:
-                    origin = b[2] if len(b) > 2 else ""
-                    destination = b[3] if len(b) > 3 else ""
-                    distance = b[4] if len(b) > 4 else ""
-                    duration = b[5] if len(b) > 5 else ""
-                    price = b[6] if len(b) > 6 else ""
-                    points = b[7] if len(b) > 7 else ""
-                    airplane = b[8] if len(b) > 8 else ""
-                    table.add_row(origin, destination, distance, duration, price, points, airplane)
-
-                console.print(table)
-                input("Press Enter to return to the panel...")
+             user.view_bookings()
         elif choice == 6:
             console.print(Panel.fit("[bold cyan]Search connections[/bold cyan]", border_style="cyan"))
             input("Press Enter to return to the panel...")
