@@ -175,4 +175,3 @@ class User:
             table.add_row(b[2], b[3], b[4], b[5], b[6], b[7], b[8])
 
         console.print(table)
-
