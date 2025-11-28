@@ -1,4 +1,4 @@
-from classes.flightsBD import flightsBD
+from classes.flightsBD import *
 from functions.flights import *
 from rich.console import Console
 from rich.panel import Panel
@@ -57,6 +57,7 @@ def user_panel(user):
              user.view_bookings()
         elif choice == 6:
             console.print(Panel.fit("[bold cyan]Search connections[/bold cyan]", border_style="cyan"))
+            FlightsBD.search_connections()
             input("Press Enter to return to the panel...")
         elif choice == 7:
             console.print(Panel.fit("[bold cyan]Loyalty program / View points[/bold cyan]", border_style="cyan"))
