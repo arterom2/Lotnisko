@@ -20,8 +20,9 @@ def admin_panel(admin):
         print("3️⃣  Cancel a flight")
         print("4️⃣  Edit a flight")
         print("5️⃣  Show admin information")
-        print("6️⃣  Log out")
-        print("7️⃣  Exit")
+        print("6️⃣  Change personal information")
+        print("7️⃣  Log out")
+        print("8️⃣  Exit")
         print("\n===================================\n")
 
         try:
@@ -52,10 +53,14 @@ def admin_panel(admin):
             input("Press Enter to return...")
 
         elif choice == 6:
+            console.print(Panel.fit("[bold cyan]Change personal information[/bold cyan]", border_style="cyan"))
+            admin.chnageInformation("data/users.txt")
+            
+        elif choice == 7:
             console.print(Panel.fit("[bold cyan]Logout[/bold cyan]", border_style="cyan"))
             return "logout"
 
-        elif choice == 7:
+        elif choice == 8:
             console.print(Panel.fit("[bold cyan]Exit[/bold cyan]", border_style="cyan"))
             console.print("\n👋 [bold yellow]Goodbye![/bold yellow]")
             return "exit"

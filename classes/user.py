@@ -1,6 +1,7 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from datetime import datetime
 
 class User:
     def __init__(self, id, login, password, first_name, last_name, role, loyalty_points):
@@ -125,6 +126,10 @@ class User:
         table.add_row("Airplane:", f"[magenta]{airplane_name}[/magenta]")
 
         console.print(Panel(table, title="Booking confirmation", border_style="green"))
+        if isinstance(matched.departure_date, datetime): 
+            departure_str = matched.departure_date.isoformat() 
+        else: 
+            departure_str = str(matched.departure_date)
 
         try:
             with open(file_path, "a", encoding="utf-8") as f:
@@ -133,7 +138,7 @@ class User:
                     matched.origin, matched.destination,
                     str(matched.distance), str(matched.duration),
                     str(matched.ticketPrice), str(matched.points),
-                    airplane_name
+                    airplane_name,departure_str, " "
                 ]) + "\n")
             console.print(f"[green]Booking saved! {matched.origin} → {matched.destination}[/green]")
         except Exception as e:
@@ -170,8 +175,13 @@ class User:
         table.add_column("Price")
         table.add_column("Points")
         table.add_column("Airplane")
+        table.add_column("Status", style="red", justify="center")
 
         for b in bookings:
-            table.add_row(b[2], b[3], b[4], b[5], b[6], b[7], b[8])
+            if len(b) > 10 and b[10].strip():
+                status = b[10]    
+            else:
+                status = " " 
+            table.add_row(b[2], b[3], b[4], b[5], b[6], b[7], b[9], b[11])
 
         console.print(table)

@@ -1,6 +1,6 @@
 from rich.table import Table
 from rich.console import Console
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 class flightsBD():
     def __init__(self, fights):
@@ -17,30 +17,41 @@ class flightsBD():
         table.add_column("From", style="cyan", no_wrap=True)
         table.add_column("To", style="cyan", no_wrap=True)
         table.add_column("Departure", style="cyan")
+        table.add_column("Arrival", style="cyan")
         table.add_column("Distance (km)", justify="right")
         table.add_column("Duration (h)", justify="right")
         table.add_column("Price ($)", justify="right")
         table.add_column("Points", justify="right")
         table.add_column("Airplane", style="magenta")
         table.add_column("Seats (taken/all)", style="green")
-
+        self.fights.sort(key=lambda f: f.departure)
         for flight in self.fights:
             if(flight.takenSeats < flight.airplane.seatsQuantity):
-                airplane_name = f"{flight.airplane.name} {flight.airplane.model}" if flight.airplane else "Unknown"
+                if flight.airplane:
+                    airplane_name = f"{flight.airplane.name} {flight.airplane.model}" 
+                else:
+                    airplane_name = "Unknown"
                 seats = f"{flight.takenSeats}/{flight.airplane.seatsQuantity}"
+                arrival_time = flight.departure + timedelta(hours=flight.duration)
                 table.add_row(
-                    flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),str(flight.ticketPrice),str(flight.points),airplane_name,seats
+                    flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")), str(arrival_time.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),str(flight.ticketPrice),str(flight.points),airplane_name,seats
                 )
         console.print(table)
         
     def timetable(self):
+        next24hours = datetime.now() + timedelta(hours=24)
+        
         odloty = []
         przyloty = []
         for flight in self.fights:
-            if(flight.origin.lower() == "poznan"):
-                odloty.append(flight)
-            elif(flight.destination.lower() == "poznan"):
-                przyloty.append(flight)
+            if isinstance(flight.departure, str):
+                flight.departure = datetime.fromisoformat(flight.departure)
+            
+            if datetime.now() <= flight.departure <= next24hours:
+                if(flight.origin.lower() == "poznan"):
+                    odloty.append(flight)
+                elif(flight.destination.lower() == "poznan"):
+                    przyloty.append(flight)
                 
         console = Console()
         table1 = Table(title="Arivals")
@@ -48,7 +59,7 @@ class flightsBD():
         
         table1.add_column("From", style="cyan", no_wrap=True)
         table1.add_column("To", style="cyan", no_wrap=True)
-        table1.add_column("Departure", style="cyan")
+        table1.add_column("Arrival", style="cyan")
         table1.add_column("Distance (km)", justify="right")
         table1.add_column("Duration (h)", justify="right")
         table1.add_column("Airplane", style="magenta")
@@ -60,15 +71,26 @@ class flightsBD():
         table2.add_column("Duration (h)", justify="right")
         table2.add_column("Airplane", style="magenta")
         
+
+        odloty.sort(key=lambda f: f.departure)
+        przyloty.sort(key=lambda f: f.departure + timedelta(hours=f.duration))
+
+        
         for flight in odloty:
-            airplane_name = f"{flight.airplane.name} {flight.airplane.model}" if flight.airplane else "Unknown"
+            if flight.airplane:
+                airplane_name = f"{flight.airplane.name} {flight.airplane.model}" 
+            else:
+                airplane_name = "Unknown"
             table2.add_row(
                 flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),airplane_name
             )
         console.print(table2)
         
         for flight in przyloty:
-            airplane_name = f"{flight.airplane.name} {flight.airplane.model}" if flight.airplane else "Unknown"
+            if flight.airplane:
+                airplane_name = f"{flight.airplane.name} {flight.airplane.model}" 
+            else:
+                airplane_name = "Unknown"
             arrival_time = flight.departure + timedelta(hours=flight.duration)
             table1.add_row(
                 flight.origin,flight.destination,str(arrival_time.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),airplane_name
@@ -142,7 +164,7 @@ class flightsBD():
             airplane_brand = None
 
         results = self.searchFlights(origin, destination, date, max_distance, airplane_brand)
-            
+        results.sort(key=lambda f: f.departure)
         if not results:
             console.print("[bold red]No flights found.[/bold red]")
             return
