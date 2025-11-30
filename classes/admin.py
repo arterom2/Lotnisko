@@ -1,7 +1,8 @@
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
 from rich.prompt import Prompt, FloatPrompt, IntPrompt
-from datetime import datetime
+from datetime import datetime, timedelta
 from functions.flights import load_flights
 from utils.file_handler import load_data, save_data
 from classes.flight import Flight
@@ -184,3 +185,144 @@ class Admin:
             console.print(f"[green]{field_name} updated successfully![/green]")
 
         console.print(Panel.fit(f"[bold green]Editing of flight ID {flight.id} completed![/bold green]", border_style="green"))
+        
+    def chnageInformation(self, file_path):
+        from functions.auth import load_users, save_data
+        console = Console()
+        self.showInformation()
+
+        while True:
+            console.print("[bold cyan]1.[/bold cyan] Change first name")
+            console.print("[bold cyan]2.[/bold cyan] Change last name")
+            console.print("[bold cyan]3.[/bold cyan] Change password")
+            console.print("[bold cyan]4.[/bold cyan] Back\n")
+            
+            try:
+                choice = int(input("Your choice: "))
+                if 1>=choice>=3:
+                    print("Please enter a number between 1 and 4")
+            except ValueError:
+                print("Please enter a number between 1 and 4")
+                
+            if choice == 1:
+                new_name = input("Enter new first name: ")
+                self.first_name = new_name
+                console.print("[green]First name updated![/green]")   
+            elif choice == 2:
+                new_last = input("Enter new last name: ")
+                self.last_name = new_last
+                console.print("[green]Last name updated![/green]")
+            elif choice == 3:
+                attempts = 0
+                max_attempts = 3
+                while attempts < max_attempts:
+                    old_pass = input("Enter current password: ")
+                    if old_pass != self.password:
+                        console.print(f"[red]Wrong password! Attempts left: {max_attempts - attempts}[/red]")
+                        attempts+=1
+                    else:
+                        new_pass = input("Enter new password: ")
+                        self.password = new_pass
+                        console.print("[green]Password updated![/green]")
+                        break
+                else:
+                    console.print("[red]Too many incorrect attempts. Returning to menu.[/red]")
+            elif choice == 4:
+                return
+            else:
+                console.print("[red]Invalid option.[/red]")
+
+
+            users = load_users(file_path)
+            new_data = []
+            for u in users:
+                if u.id == self.id:
+                    new_data.append([self.id, self.login, self.password, self.first_name, self.last_name, self.role, 0])
+                else:
+                    new_data.append([u.id, u.login, u.password, u.first_name, u.last_name, u.role, u.loyalty_points])
+            save_data(file_path, new_data)
+            self.showInformation()
+            
+    def cancel_flight(self, FlightsDB):
+        from utils.file_handler import load_data, save_data
+         
+        console = Console()
+        
+        console.print(Panel.fit("[bold cyan]Available Flights[/bold cyan]", border_style="cyan"))
+        console = Console()
+        table = Table(title="Available Flights")
+
+        table.add_column("ID", style="blue")
+        table.add_column("From", style="cyan", no_wrap=True)
+        table.add_column("To", style="cyan", no_wrap=True)
+        table.add_column("Departure", style="cyan")
+        table.add_column("Arrival", style="cyan")
+        table.add_column("Distance (km)", justify="right")
+        table.add_column("Duration (h)", justify="right")
+        table.add_column("Price ($)", justify="right")
+        table.add_column("Points", justify="right")
+        table.add_column("Airplane", style="magenta")
+        table.add_column("Seats (taken/all)", style="green")
+        FlightsDB.fights.sort(key=lambda f: f.departure)
+        
+        for flight in FlightsDB.fights:
+            if flight.airplane:
+                airplane_name = f"{flight.airplane.name} {flight.airplane.model}" 
+            else:
+                airplane_name = "Unknown"
+            seats = f"{flight.takenSeats}/{flight.airplane.seatsQuantity}"
+            arrival_time = flight.departure + timedelta(hours=flight.duration)
+            table.add_row(
+                str(flight.id),flight.origin,flight.destination,str(flight.departure.strftime("%Y-%m-%d %H:%M")), str(arrival_time.strftime("%Y-%m-%d %H:%M")),str(flight.distance),str(flight.duration),str(flight.ticketPrice),str(flight.points),airplane_name,seats
+            )
+        console.print(table)
+        
+        while True:
+            console.print("[bold cyan]1.[/bold cyan] Delete flight")
+            console.print("[bold cyan]2.[/bold cyan] Back\n")
+
+            try:
+                choice = int(input("Your choice: "))
+                if choice not in [1, 2]:
+                    console.print("[red]Please enter 1 or 2[/red]")
+                    continue
+            except ValueError:
+                console.print("[red]Please enter 1 or 2[/red]")
+                continue
+
+            if choice == 2:
+                return
+
+            if choice == 1:
+                try:
+                    flight_id = int(input("Enter flight id to delete: "))
+                    flight_to_cancel = next((f for f in FlightsDB.fights if f.id == flight_id), None)
+                    if not flight_to_cancel:
+                        console.print("[red]This ID does not exist![/red]")
+                        continue
+
+                    FlightsDB.fights = [f for f in FlightsDB.fights if f.id != flight_id]
+                    console.print("[green]Flight deleted![/green]")
+
+                    flight_data = load_data("data/flight.txt")
+                    new_flights = [f for f in flight_data if int(f[0]) != flight_to_cancel.id]
+                    save_data("data/flight.txt", new_flights)
+
+                    bookings = load_data("data/bookings.txt")
+                    new_bookings = []
+
+                    for b in bookings:
+                        if len(b) < 2:
+                            continue
+                        flight_id_str = b[1].strip()
+                        if flight_id_str.isdigit() and int(flight_id_str) == flight_to_cancel.id:
+                            if len(b) < 12:
+                                b.append("CANCELLED")
+                            else:
+                                b[-1] = "CANCELLED" 
+                        new_bookings.append(b)
+
+                    save_data("data/bookings.txt", new_bookings)
+
+                except ValueError:
+                    console.print(f"[yellow]Enter a number![/yellow]")

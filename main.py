@@ -34,7 +34,6 @@ def main():
                 continue
             elif result == "exit":
                 break
-
         else:
             print(f"Unknown role for {user.first_name} {user.last_name}.")
 
