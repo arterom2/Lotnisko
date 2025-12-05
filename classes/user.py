@@ -88,7 +88,7 @@ class User:
         console = Console()
         console.print(f"[green]{self.first_name} you have {self.loyalty_points} points!! Congratulations[/green]")
         
-    def book_flight(self, flights, flightsBD, file_path="data/bookings.txt"):
+    def book_flight(self, flights, flightsBD, file_path="data/bookings.txt", file_path2="data/users.txt"):
         console = Console()
         console.print(Panel.fit("[bold magenta]Book a flight[/bold magenta]", border_style="magenta"))
 
@@ -102,11 +102,43 @@ class User:
 
         origin = parts[0].strip()
         destination = parts[1].strip()
-
         matched = None
         for f in flights:
             if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower():
                 matched = f
+                console.print(f"\nYou have [yellow]{self.loyalty_points}[/yellow] points.")
+                while True:
+                    use_points = input("Do you want to use points for a discount? (yes/no): ").lower()
+                    if(use_points == "yes" or use_points == "no"):
+                        break
+                    else:
+                        console.print("[red]Your answer has to be 'yes' or 'no' [/red]")
+            
+                final_price = matched.ticketPrice
+                points_used = 0
+                
+                if(use_points == "yes"):
+                    while True:
+                        points_used = int(input("How many points do you want to use? "))
+
+                        if points_used < 0:
+                            console.print("[red]You cannot use negative points.[/red]")
+                        elif points_used > self.loyalty_points:
+                            console.print("[red]You don't have that many points![/red]")
+                        else:
+                            discount = (points_used*0.5)
+                            if(discount > final_price):
+                                max_discount = final_price/0.5
+                                console.print(f"[red]Discount cannot be higher than ticket price. Maximal amount of points you can use is {max_discount}[/red]")
+                            else:
+                                final_price -= discount
+                                self.loyalty_points -= points_used
+                                console.print(f"[green]Discount applied: {discount} zł[/green]")
+                                console.print(f"[green]New price: {final_price} zł[/green]")
+                                self.loyalty_points += matched.points
+                                break
+                elif use_points == "no":
+                    self.loyalty_points += matched.points
                 break
 
         if not matched:
@@ -120,16 +152,28 @@ class User:
         table.add_row("To:", f"[cyan]{matched.destination}[/cyan]")
         table.add_row("Distance:", f"{matched.distance} km")
         table.add_row("Duration:", f"{matched.duration} h")
-        table.add_row("Price:", f"${matched.ticketPrice}")
+        table.add_row("Price:", f"${final_price}")
         table.add_row("Points:", f"{matched.points}")
         airplane_name = f"{matched.airplane.name} {matched.airplane.model}"
         table.add_row("Airplane:", f"[magenta]{airplane_name}[/magenta]")
 
         console.print(Panel(table, title="Booking confirmation", border_style="green"))
-        if isinstance(matched.departure_date, datetime): 
-            departure_str = matched.departure_date.isoformat() 
+        
+        if isinstance(matched.departure, datetime): 
+            departure_str = matched.departure.isoformat() 
         else: 
-            departure_str = str(matched.departure_date)
+            departure_str = str(matched.departure)
+        
+        from functions.auth import load_users, save_data   
+        users = load_users(file_path2)
+        new_data = []
+        for u in users:
+            if u.id == self.id:
+                new_data.append([self.id, self.login, self.password, self.first_name, self.last_name, self.role, self.loyalty_points])
+            else:
+                new_data.append([u.id, u.login, u.password, u.first_name, u.last_name, u.role, u.loyalty_points])
+        save_data(file_path2, new_data)
+        self.showInformation()
 
         try:
             with open(file_path, "a", encoding="utf-8") as f:
