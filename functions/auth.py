@@ -42,27 +42,43 @@ def register(users, file_path):
 
     while True:
         console.print("[yellow]Login:[/yellow]", end=" ")
-        login_input = input()
-
+        login_input = input().strip()
+        if login_input == "":
+            console.print("[red]Login cannot be empty. Please enter a login.[/red]")
+            continue
         if any(u.login == login_input for u in users):
             console.print("[bold red]❌ This login already exists! Try another.[/bold red]")
-        else:
-            break
+            continue
+        break
 
     while True:
         console.print("[yellow]Password:[/yellow]", end=" ")
         password_input = input()
+        if password_input.strip() == "":
+            console.print("[red]Password cannot be empty. Please enter a password.[/red]")
+            continue
         console.print("[yellow]Confirm Password:[/yellow]", end=" ")
         password_confirm = input()
         if password_input != password_confirm:
             console.print("[bold red]❌ Passwords do not match! Please try again.[/bold red]")
-        else:
-            break
+            continue
+        break
 
-    console.print("[yellow]First Name:[/yellow]", end=" ")
-    first_name = input()
-    console.print("[yellow]Last Name:[/yellow]", end=" ")
-    last_name = input()
+    while True:
+        console.print("[yellow]First Name:[/yellow]", end=" ")
+        first_name = input().strip()
+        if first_name == "":
+            console.print("[red]First name cannot be empty.[/red]")
+            continue
+        break
+
+    while True:
+        console.print("[yellow]Last Name:[/yellow]", end=" ")
+        last_name = input().strip()
+        if last_name == "":
+            console.print("[red]Last name cannot be empty.[/red]")
+            continue
+        break
 
     new_id = str(len(users) + 1)
     new_user = User(new_id, login_input, password_input, first_name, last_name, "0", 0)

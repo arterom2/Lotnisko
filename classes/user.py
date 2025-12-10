@@ -102,44 +102,83 @@ class User:
 
         origin = parts[0].strip()
         destination = parts[1].strip()
-        matched = None
-        for f in flights:
-            if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower():
-                matched = f
-                console.print(f"\nYou have [yellow]{self.loyalty_points}[/yellow] points.")
-                while True:
-                    use_points = input("Do you want to use points for a discount? (yes/no): ").lower()
-                    if(use_points == "yes" or use_points == "no"):
-                        break
-                    else:
-                        console.print("[red]Your answer has to be 'yes' or 'no' [/red]")
-            
-                final_price = matched.ticketPrice
-                points_used = 0
-                
-                if(use_points == "yes"):
-                    while True:
-                        points_used = int(input("How many points do you want to use? "))
+        date_input = input("Enter flight date (YYYY-MM-DD): ").strip()
+        if date_input == "":
+            console.print("[red]Date cannot be empty. Booking cancelled.[/red]")
+            return
 
-                        if points_used < 0:
-                            console.print("[red]You cannot use negative points.[/red]")
-                        elif points_used > self.loyalty_points:
-                            console.print("[red]You don't have that many points![/red]")
-                        else:
-                            discount = (points_used*0.5)
-                            if(discount > final_price):
-                                max_discount = final_price/0.5
-                                console.print(f"[red]Discount cannot be higher than ticket price. Maximal amount of points you can use is {max_discount}[/red]")
-                            else:
-                                final_price -= discount
-                                self.loyalty_points -= points_used
-                                console.print(f"[green]Discount applied: {discount} zł[/green]")
-                                console.print(f"[green]New price: {final_price} zł[/green]")
-                                self.loyalty_points += matched.points
-                                break
-                elif use_points == "no":
-                    self.loyalty_points += matched.points
+        matches = []
+        for f in flights:
+            try:
+                f_date = f.departure.strftime('%Y-%m-%d')
+            except Exception:
+                f_date = str(f.departure)
+            if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower() and f_date == date_input:
+                matches.append(f)
+
+        if not matches:
+            console.print("[red]No matching flight found for that route on that date.[/red]")
+            return
+
+        if len(matches) == 1:
+            matched = matches[0]
+        else:
+            console.print("Multiple flights found on that date:")
+            for i, mf in enumerate(matches, start=1):
+                try:
+                    dep_str = mf.departure.strftime('%Y-%m-%d %H:%M')
+                except Exception:
+                    dep_str = str(mf.departure)
+                console.print(f"{i}. ID:{mf.id} Departure: {dep_str} Airplane: {mf.airplane.name} {mf.airplane.model}")
+            sel = input("Enter number of flight to book: ").strip()
+            try:
+                sel_i = int(sel)
+                if 1 <= sel_i <= len(matches):
+                    matched = matches[sel_i-1]
+                else:
+                    console.print("[red]Invalid selection. Booking cancelled.[/red]")
+                    return
+            except ValueError:
+                console.print("[red]Invalid input. Booking cancelled.[/red]")
+                return
+
+        console.print(f"\nYou have [yellow]{self.loyalty_points}[/yellow] points.")
+        while True:
+            use_points = input("Do you want to use points for a discount? (yes/no): ").lower()
+            if(use_points == "yes" or use_points == "no"):
                 break
+            else:
+                console.print("[red]Your answer has to be 'yes' or 'no' [/red]")
+
+        final_price = matched.ticketPrice
+        points_used = 0
+
+        if(use_points == "yes"):
+            while True:
+                try:
+                    points_used = int(input("How many points do you want to use? "))
+                except ValueError:
+                    console.print("[red]Please enter a number.[/red]")
+                    continue
+
+                if points_used < 0:
+                    console.print("[red]You cannot use negative points.[/red]")
+                elif points_used > self.loyalty_points:
+                    console.print("[red]You don't have that many points![/red]")
+                else:
+                    discount = (points_used*0.5)
+                    if(discount > final_price):
+                        max_discount = int(final_price/0.5)
+                        console.print(f"[red]Discount cannot be higher than ticket price. Maximal amount of points you can use is {max_discount}[/red]")
+                    else:
+                        final_price -= discount
+                        self.loyalty_points -= points_used
+                        console.print(f"[green]Discount applied: {discount} zł[/green]")
+                        console.print(f"[green]New price: {final_price} zł[/green]")
+                        self.loyalty_points += matched.points
+                        break
+        else:
+            self.loyalty_points += matched.points
 
         if not matched:
             console.print("[red]No matching flight found.[/red]")
@@ -212,20 +251,34 @@ class User:
             return
 
         table = Table(title="Your Bookings")
+        table.add_column("#", style="dim", width=4)
+        table.add_column("Flight ID", style="magenta")
         table.add_column("From", style="cyan")
         table.add_column("To", style="cyan")
         table.add_column("Distance")
         table.add_column("Duration")
         table.add_column("Price")
         table.add_column("Points")
+        table.add_column("Extra")
         table.add_column("Airplane")
+        table.add_column("Date")
         table.add_column("Status", style="red", justify="center")
 
-        for b in bookings:
-            if len(b) > 10 and b[10].strip():
-                status = b[10]    
-            else:
-                status = " " 
-            table.add_row(b[2], b[3], b[4], b[5], b[6], b[7], b[9], b[11])
+        for idx, b in enumerate(bookings, start=1):
+            row = [b[i] if len(b) > i else "" for i in range(12)]
+            table.add_row(
+                str(idx),
+                row[1],
+                row[2],
+                row[3],
+                row[4],
+                row[5],
+                row[6],
+                row[7],
+                row[8],
+                row[9],
+                row[10],
+                row[11]
+            )
 
         console.print(table)

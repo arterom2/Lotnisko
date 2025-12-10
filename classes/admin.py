@@ -242,6 +242,52 @@ class Admin:
                     new_data.append([u.id, u.login, u.password, u.first_name, u.last_name, u.role, u.loyalty_points])
             save_data(file_path, new_data)
             self.showInformation()
+    
+    def delete_user(self, file_path='data/users.txt'):
+        """Simple delete user flow. Admin can type 'back' to return to panel."""
+        console = Console()
+        while True:
+            users = load_data(file_path)
+            if not users:
+                console.print("[yellow]No users found.[/yellow]")
+                return
+
+            console.print(Panel.fit("[bold cyan]Users[/bold cyan]", border_style="cyan"))
+            for row in users:
+                uid = row[0] if len(row) > 0 else ""
+                login = row[1] if len(row) > 1 else ""
+                first = row[3] if len(row) > 3 else ""
+                last = row[4] if len(row) > 4 else ""
+                console.print(f"ID: {uid} | {login} | {first} {last}")
+
+            console.print("\nEnter the user ID to delete, or type 'back' to return to the admin panel.")
+            choice = input("User ID or 'back': ").strip()
+            if choice.lower() == 'back':
+                return
+
+            if not choice.isdigit():
+                console.print("[red]Please enter a valid numeric user ID or 'back'.[/red]")
+                continue
+
+            if choice == str(self.id):
+                console.print("[red]You cannot delete your own admin account.[/red]")
+                continue
+
+            found = False
+            new_users = []
+            for row in users:
+                if len(row) > 0 and row[0].strip() == choice:
+                    found = True
+                    continue
+                new_users.append(row)
+
+            if not found:
+                console.print("[red]User ID not found. Try again.[/red]")
+                continue
+
+            save_data(file_path, new_users)
+            console.print(f"[green]User with ID {choice} deleted.[/green]")
+            return
             
     def cancel_flight(self, FlightsDB):
         from utils.file_handler import load_data, save_data
