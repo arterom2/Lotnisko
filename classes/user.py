@@ -102,19 +102,70 @@ class User:
 
         origin = parts[0].strip()
         destination = parts[1].strip()
-        date_input = input("Enter flight date (YYYY-MM-DD): ").strip()
+        date_input = input("Enter flight date or datetime (YYYY-MM-DD or YYYY-MM-DD HH:MM").strip()
         if date_input == "":
-            console.print("[red]Date cannot be empty. Booking cancelled.[/red]")
+            console.print("[red]Date/time cannot be empty. Booking cancelled.[/red]")
             return
 
+        import re
         matches = []
+        date_norm = date_input.replace('T', ' ').strip()
+        date_only_pattern = r'^\d{4}-\d{2}-\d{2}$'
+        datetime_min_pattern = r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$'
+
         for f in flights:
+            f_date_only = None
+            f_datetime_min = None
+            f_iso = None
+            f_raw = None
             try:
-                f_date = f.departure.strftime('%Y-%m-%d')
+                if isinstance(f.departure, datetime):
+                    f_date_only = f.departure.strftime('%Y-%m-%d')
+                    f_datetime_min = f.departure.strftime('%Y-%m-%d %H:%M')
+                    f_iso = f.departure.isoformat()
+                    f_raw = f_iso
+                else:
+                    f_raw = str(f.departure)
+                    f_raw_norm = f_raw.replace('T', ' ').strip()
+                    try:
+                        parsed = datetime.fromisoformat(f_raw)
+                        f_date_only = parsed.strftime('%Y-%m-%d')
+                        f_datetime_min = parsed.strftime('%Y-%m-%d %H:%M')
+                        f_iso = parsed.isoformat()
+                        f_raw = f_iso
+                    except Exception:
+                        parts = f_raw_norm.split(' ')
+                        f_date_only = parts[0]
+                        if len(parts) > 1 and ':' in parts[1]:
+                            f_datetime_min = f_date_only + ' ' + parts[1][:5]
+                        else:
+                            f_datetime_min = f_date_only
+
             except Exception:
-                f_date = str(f.departure)
-            if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower() and f_date == date_input:
-                matches.append(f)
+                f_raw = str(getattr(f, 'departure', ''))
+                f_date_only = f_raw.split(' ')[0] if ' ' in f_raw else f_raw
+                f_datetime_min = f_date_only
+
+            if f.origin.lower() == origin.lower() and f.destination.lower() == destination.lower():
+                matched_flag = False
+                if re.match(date_only_pattern, date_norm):
+                    if f_date_only == date_norm:
+                        matched_flag = True
+                elif re.match(datetime_min_pattern, date_norm):
+                    if f_datetime_min == date_norm:
+                        matched_flag = True
+                else:
+                    try:
+                        inp_parsed = datetime.fromisoformat(date_input)
+                        inp_iso = inp_parsed.isoformat()
+                        if f_iso == inp_iso or (f_datetime_min and f_datetime_min == inp_parsed.strftime('%Y-%m-%d %H:%M')):
+                            matched_flag = True
+                    except Exception:
+                        if f_raw == date_input or f_raw.replace('T', ' ') == date_input:
+                            matched_flag = True
+
+                if matched_flag:
+                    matches.append(f)
 
         if not matches:
             console.print("[red]No matching flight found for that route on that date.[/red]")

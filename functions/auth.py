@@ -27,8 +27,7 @@ def login(users):
     for u in users:
         if u.login == login_input and u.password == password_input:
             console.print(Panel(
-                f"✅ Logged in as [bold green]{u.first_name} {u.last_name}[/bold green]\n"
-                f"Role: [cyan]{u.role}[/cyan]",
+                f"✅ Logged in as [bold green]{u.first_name} {u.last_name}[/bold green]\n",
                 border_style="green"
             ))
             return u

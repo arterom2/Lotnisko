@@ -4,15 +4,18 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from classes.user import User
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.align import Align
 
 console = Console()
 
 def user_panel(user):
     poprawnosc = False
     choice = 0
-    print("\n===================================")
-    print(f"✈️ Welcome, {user.first_name} {user.last_name}!")
-    print("===================================\n")
+    header = Text(f"✈️  Welcome, {user.first_name} {user.last_name}!", justify="center", style="bold cyan")
+    console.print(Panel(header, border_style="cyan", padding=(1, 2)))
     
     while not poprawnosc:
         flights = load_flights(file_path_airplanes="data/airplanes.txt", file_path_flights="data/flight.txt")
