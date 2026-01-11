@@ -310,7 +310,6 @@ class User:
         table.add_column("Duration")
         table.add_column("Price")
         table.add_column("Points")
-        table.add_column("Extra")
         table.add_column("Airplane")
         table.add_column("Date")
         table.add_column("Status", style="red", justify="center")

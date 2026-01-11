@@ -25,13 +25,12 @@ def user_panel(user):
         print("1️⃣  View tabletime of flights")
         print("2️⃣  View available flights")
         print("3️⃣  Book a flight")
-        print("4️⃣  Cancel a flight")
-        print("5️⃣  View my bookings")
-        print("6️⃣  Search connections (from → to)")
-        print("7️⃣  Loyalty program / View points")
-        print("8️⃣  Change personal information")
-        print("9️⃣  Log out")
-        print("🔟 Exit\n")
+        print("4️⃣  View my bookings")
+        print("5️⃣  Search connections (from → to)")
+        print("6️⃣  Loyalty program / View points")
+        print("7️⃣  Change personal information")
+        print("8️⃣  Log out")
+        print("9️⃣  Exit\n")
         
         print("Please select an option by entering the number.\n")
         print("===================================\n")
@@ -54,26 +53,23 @@ def user_panel(user):
         elif choice == 3:
               user.book_flight(flights, FlightsBD)
         elif choice == 4:
-            console.print(Panel.fit("[bold cyan]Cancel fLight [/bold cyan]", border_style="cyan"))
-            input("Press Enter to return to the panel...")
-        elif choice == 5:
              user.view_bookings()
-        elif choice == 6:
+        elif choice == 5:
             console.print(Panel.fit("[bold cyan]Search connections[/bold cyan]", border_style="cyan"))
             FlightsBD.search_connections()
             input("Press Enter to return to the panel...")
-        elif choice == 7:
+        elif choice == 6:
             console.print(Panel.fit("[bold cyan]Loyalty program / View points[/bold cyan]", border_style="cyan"))
             user.ViewPoints()
             input("Press Enter to return to the panel...")
-        elif choice == 8:
+        elif choice == 7:
             console.print(Panel.fit("[bold cyan]Change personal information[/bold cyan]", border_style="cyan"))
             user.chnageInformation("data/users.txt")
             input("Press Enter to return to the panel...")
-        elif choice == 9:
+        elif choice == 8:
             console.print(Panel.fit("[bold cyan]Logout[/bold cyan]", border_style="cyan")) 
             return "logout"
-        elif choice == 10:
+        elif choice == 9:
             console.print(Panel.fit("[bold cyan]Exit[/bold cyan]", border_style="cyan")) 
             console.print("\n👋 [bold yellow]Goodbye![/bold yellow]")
             return "exit"
